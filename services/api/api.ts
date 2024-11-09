@@ -53,8 +53,9 @@ api.interceptors.response.use(
 interface SuccessResponseRQ<T> {
   data: T;
 }
-interface SuccessResponse<T> {
-  data: T;
+
+interface ErrorResponseRQ {
+  error: string;
 }
 
 interface detailsProps {
@@ -62,17 +63,9 @@ interface detailsProps {
   message: string;
 }
 
-// Error response interface
-interface ErrorResponse {
-  status: number;
-  type: ResponseStatus.Error;
-  message: string;
-  details?: detailsProps[] | null | undefined;
-}
-
 // Union type for both success and error responses
-export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse;
-export type ApiResponseRQ<T> = SuccessResponseRQ<T> | undefined;
+export type ApiResponse<T> = SuccessResponseRQ<T> | ErrorResponseRQ;
+export type ApiResponseRQ<T> = SuccessResponseRQ<T> | ErrorResponseRQ;
 
 const handleApiErrorThrowRequests = (error: any) => {
   switch (error.response.status) {
@@ -103,16 +96,11 @@ export const postApiRQ = async <T = any, P = any>(
     const response: AxiosResponse = await api.post<T>(url, data);
     return response.data.data;
   } catch (error: any) {
-    // Handle error as needed
-    if (error.response.status === 400) {
-      throw new Error(error.response.data.error.message);
-    }
-
     if (error.response.status === 500) {
       throw new Error("Internal Server Error");
     }
 
-    throw new Error("Something went wrong. Please try again later.");
+    throw new Error(error.response.data.error);
   }
 };
 
@@ -124,16 +112,11 @@ export const patchApiRQ = async <T = any, P = any>(
     const response: AxiosResponse = await api.patch<T>(url, data);
     return response.data.data;
   } catch (error: any) {
-    // Handle error as needed
-    if (error.response.status === 400) {
-      throw new Error(error.response.data.error.message);
-    }
-
     if (error.response.status === 500) {
       throw new Error("Internal Server Error");
     }
 
-    throw new Error("Something went wrong. Please try again later.");
+    throw new Error(error.response.data.error);
   }
 };
 
@@ -149,30 +132,7 @@ const getApi = async <T = any>(url: string): Promise<ApiResponse<T>> => {
       error,
     });
 
-    if (error.response.status === 400) {
-      return {
-        message: error.response.data.error.message,
-        type: ResponseStatus.Error,
-        status: error.response.status,
-      };
-    }
-
-    // Handle error as needed
-    if (error.response?.data) {
-      const errorResponse = error.response;
-
-      return {
-        message: errorResponse.message,
-        type: ResponseStatus.Error,
-        status: error.response.status,
-      };
-    }
-
-    return {
-      message: "Something went wrong. Please try again later.",
-      type: ResponseStatus.Error,
-      status: error.response.status,
-    };
+    return error.response.data;
   }
 };
 
@@ -189,28 +149,7 @@ const postApi = async <T = any, P = any>(
   } catch (error: any) {
     // Handle error as needed
 
-    if (error.response?.data) {
-      //error response from server
-      //giving priority to error details
-      const errorResponse = error.response.data.error;
-      const errorDetails = error.response.data.error.details;
-
-      return {
-        message:
-          errorDetails.length > 0
-            ? errorDetails[0].message
-            : errorResponse.message,
-        type: ResponseStatus.Error,
-        status: error.response?.status,
-        details: errorDetails,
-      };
-    }
-
-    return {
-      message: error,
-      type: ResponseStatus.Error,
-      status: error.response?.status,
-    };
+    return error.response.data;
   }
 };
 
@@ -227,21 +166,7 @@ const patchApi = async <T = any, P = any>(
   } catch (error: any) {
     console.log({ error });
     // Handle error as needed
-    if (error.response?.data) {
-      const errorResponse = error.response.data.error;
-
-      return {
-        message: errorResponse.message,
-        type: ResponseStatus.Error,
-        status: error.response?.status,
-      };
-    }
-
-    return {
-      message: error,
-      type: ResponseStatus.Error,
-      status: error.response?.status,
-    };
+    return error.response.data;
   }
 };
 
@@ -256,23 +181,7 @@ const putApi = async <T = any, P = any>(
       data: response.data.data,
     };
   } catch (error: any) {
-    console.log({ error });
-    // Handle error as needed
-    if (error.response?.data) {
-      const errorResponse = error.response.data.error;
-
-      return {
-        message: errorResponse.message,
-        type: ResponseStatus.Error,
-        status: error.response?.status,
-      };
-    }
-
-    return {
-      message: error,
-      type: ResponseStatus.Error,
-      status: error.response?.status,
-    };
+    return error.response.data;
   }
 };
 
