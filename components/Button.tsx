@@ -32,7 +32,7 @@ const ButtonStyles = cva(
   {
     variants: {
       variant: {
-        primary: "bg-sky-300 h-11",
+        primary: "bg-primary h-11 border border-input",
         secondary: "bg-slate-100 border border-gray-200",
         inverse: "bg-white border border-sky-300",
         disabled: "bg-gray-300",

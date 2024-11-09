@@ -1,14 +1,12 @@
 import React from "react";
-import { View, StyleSheet, Alert } from "react-native";
+import { View } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Input from "@/components/ui/Input"; // Custom Input component
-import Label from "@/components/ui/Label"; // Custom Label component
-import Button from "@/components/ui/Button"; // Custom Button component
-import { stylesConstants } from "@/common/styleConstants";
-import Text from "@/components/ui/Text";
-import { createStyleSheet, useStyles } from "react-native-unistyles";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
+import Text from "@/components/Text";
+import { Link } from "expo-router";
 
 // Define validation schema with Zod
 const loginSchema = z.object({
@@ -23,9 +21,15 @@ interface ILoginForm {
   onSubmitCB: (data: LoginSchema) => void;
   btnText: string;
   title: string;
+  redirectPath: string;
 }
 
-const Login: React.FC<ILoginForm> = ({ onSubmitCB, btnText, title }) => {
+const Login: React.FC<ILoginForm> = ({
+  onSubmitCB,
+  btnText,
+  title,
+  redirectPath,
+}) => {
   const {
     control,
     handleSubmit,
@@ -39,29 +43,16 @@ const Login: React.FC<ILoginForm> = ({ onSubmitCB, btnText, title }) => {
     },
   });
 
-  const { styles } = useStyles(stylesheet);
+  const path = redirectPath ?? "/";
 
   const onSubmit = (data: LoginSchema) => {
     onSubmitCB(data);
   };
 
   return (
-    <View style={styles.container}>
-      <View
-        style={{
-          justifyContent: "center",
-          width: "100%",
-          // alignItems: "center",
-        }}
-      >
-        <Text
-          weight="semiBold"
-          style={{
-            marginBottom: stylesConstants.FOUR,
-          }}
-        >
-          {title}
-        </Text>
+    <View className="w-5/6 gap-2 bg-card border border-border p-6 rounded-md">
+      <View className="justify-center w-full items-center mb-6">
+        <Text className="text-2xl">{title}</Text>
       </View>
 
       <Controller
@@ -76,7 +67,9 @@ const Login: React.FC<ILoginForm> = ({ onSubmitCB, btnText, title }) => {
           />
         )}
       />
-      {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
+      {errors.email && (
+        <Text className="text-destructive mb-2">{errors.email.message}</Text>
+      )}
 
       <Controller
         control={control}
@@ -91,7 +84,7 @@ const Login: React.FC<ILoginForm> = ({ onSubmitCB, btnText, title }) => {
         )}
       />
       {errors.username && (
-        <Text style={styles.error}>{errors.username.message}</Text>
+        <Text className="text-destructive mb-2">{errors.username.message}</Text>
       )}
 
       <Controller
@@ -108,23 +101,21 @@ const Login: React.FC<ILoginForm> = ({ onSubmitCB, btnText, title }) => {
         )}
       />
       {errors.password?.message && (
-        <Text style={styles.error}>{errors.password.message}</Text>
+        <Text className="text-destructive mb-2">{errors.password.message}</Text>
       )}
 
       {/* Submit Button */}
-      <Button title={btnText} onPress={handleSubmit(onSubmit)} />
+      <Button
+        title={btnText}
+        onPress={handleSubmit(onSubmit)}
+        className="mt-4"
+      />
+
+      <Link href={path as any} className="text-center text-mutedForeground">
+        New?? Register then!!
+      </Link>
     </View>
   );
 };
 
 export default Login;
-
-const stylesheet = createStyleSheet((theme) => ({
-  container: {
-    width: "80%",
-  },
-  error: {
-    color: "red",
-    marginBottom: 8,
-  },
-}));

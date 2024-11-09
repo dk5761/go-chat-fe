@@ -6,7 +6,7 @@ import Login from "@/forms/Login";
 
 type Props = {};
 
-const index = (props: Props) => {
+const Register = (props: Props) => {
   const onClickHandler = ({
     username,
     email,
@@ -42,12 +42,12 @@ const index = (props: Props) => {
       <Input value="asd" /> */}
       <Login
         onSubmitCB={(data) => onClickHandler(data)}
-        btnText="Login"
-        title="Login"
-        redirectPath="/register"
+        btnText="Register"
+        title="Register"
+        redirectPath="/"
       />
     </View>
   );
 };
 
-export default index;
+export default Register;

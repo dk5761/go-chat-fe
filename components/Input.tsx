@@ -21,10 +21,7 @@ const Input = forwardRef<TextInput, InputProps>(
         ref={ref}
         style={[style]}
         {...props}
-        className="border border-gray-200 rounded-lg px-2 h-10 dark:bg-gray-700 
-        dark:text-white dark:placeholder:text-slate-500 w-full dark:selection:text-white
-            selection:text-sky-200 placeholder:text-slate-400
-        "
+        className="w-full border border-input bg-transparent rounded-lg px-2 h-10 selection:text-mutedForeground placeholder:text-mutedForeground text-cardForeground"
       />
     );
   }
