@@ -1,12 +1,28 @@
-import { StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 import React from "react";
-import Button from "@/components/Button";
-import Input from "@/components/Input";
 import Login from "@/forms/Login";
+import { toast } from "sonner-native";
+import { useMutation } from "@tanstack/react-query";
+import { signUp } from "@/state/queries/auth/auth";
+import { router } from "expo-router";
 
 type Props = {};
 
 const Register = (props: Props) => {
+  const mutation = useMutation({
+    mutationFn: ({
+      email,
+      username,
+      password,
+    }: {
+      email: string;
+      username: string;
+      password: string;
+    }) => {
+      return signUp(email, username, password);
+    },
+  });
+
   const onClickHandler = ({
     username,
     email,
@@ -16,20 +32,29 @@ const Register = (props: Props) => {
     email: string;
     password: string;
   }) => {
-    // mutation.mutate(
-    //   {
-    //     username,
-    //     email,
-    //     password,
-    //   },
-    //   {
-    //     onSuccess: (data) => {
-    //       setAuthToken(data.token);
-    //       router.replace("/");
-    //     },
-    //     onError: (err) => {},
-    //   }
-    // );
+    mutation.mutate(
+      {
+        username,
+        email,
+        password,
+      },
+      {
+        onSuccess: (data) => {
+          // setAuthToken(data.token);
+          router.replace("/");
+        },
+        onError: (err, as) => {
+          toast.error("Error", {
+            description: err.message,
+            styles: {
+              toast: {
+                backgroundColor: "#1e293b",
+              },
+            },
+          });
+        },
+      }
+    );
   };
 
   return (

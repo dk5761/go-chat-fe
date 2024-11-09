@@ -3,10 +3,28 @@ import React from "react";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Login from "@/forms/Login";
+import useAuthContext from "@/hooks/contextHooks/useAuthContext";
+import { useMutation } from "@tanstack/react-query";
+import { login } from "@/state/queries/auth/auth";
+import { router } from "expo-router";
 
-type Props = {};
+const index = () => {
+  const { setAuthToken } = useAuthContext();
 
-const index = (props: Props) => {
+  const mutation = useMutation({
+    mutationFn: ({
+      email,
+      username,
+      password,
+    }: {
+      email: string;
+      username: string;
+      password: string;
+    }) => {
+      return login(email, username, password);
+    },
+  });
+
   const onClickHandler = ({
     username,
     email,
@@ -16,20 +34,20 @@ const index = (props: Props) => {
     email: string;
     password: string;
   }) => {
-    // mutation.mutate(
-    //   {
-    //     username,
-    //     email,
-    //     password,
-    //   },
-    //   {
-    //     onSuccess: (data) => {
-    //       setAuthToken(data.token);
-    //       router.replace("/");
-    //     },
-    //     onError: (err) => {},
-    //   }
-    // );
+    mutation.mutate(
+      {
+        username,
+        email,
+        password,
+      },
+      {
+        onSuccess: (data) => {
+          setAuthToken(data.token);
+          router.replace("/");
+        },
+        onError: (err) => {},
+      }
+    );
   };
 
   return (

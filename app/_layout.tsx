@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { AuthProvider } from "@/state/context/auth/authContext";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import db from "@/services/db";
 import migrations from "@/drizzle/migrations";
 import {
@@ -20,6 +21,7 @@ import {
   Rubik_800ExtraBold,
   Rubik_900Black,
 } from "@expo-google-fonts/rubik";
+import { Toaster } from "sonner-native";
 // Use imperatively
 colorScheme.set("system");
 
@@ -66,11 +68,14 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <KeyboardProvider>
-        <AuthProvider>
-          <Slot />
-        </AuthProvider>
-      </KeyboardProvider>
+      <GestureHandlerRootView>
+        <KeyboardProvider>
+          <AuthProvider>
+            <Slot />
+            <Toaster />
+          </AuthProvider>
+        </KeyboardProvider>
+      </GestureHandlerRootView>
     </QueryClientProvider>
   );
 }

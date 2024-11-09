@@ -96,10 +96,7 @@ export const postApiRQ = async <T = any, P = any>(
     const response: AxiosResponse = await api.post<T>(url, data);
     return response.data.data;
   } catch (error: any) {
-    if (error.response.status === 500) {
-      throw new Error("Internal Server Error");
-    }
-
+    console.log(error);
     throw new Error(error.response.data.error);
   }
 };

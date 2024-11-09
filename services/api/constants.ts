@@ -10,7 +10,7 @@ export const wsBaseUrl = "ws://chat.be.dk5761.com:8080";
 
 export const apiUrls = {
   login: "/auth/login",
-  register: "/auth/register",
+  register: "/auth/signup",
   users: "/api/users",
   details: "/api/details",
 };
