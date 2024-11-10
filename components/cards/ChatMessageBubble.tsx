@@ -3,7 +3,9 @@ import React from "react";
 import { cva } from "class-variance-authority";
 import Text from "../Text";
 import { cn } from "@/utils/utils";
-import { colorScheme } from "nativewind";
+import { MessageStatus } from "@/state/context/websocket/websocketContext";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { cssInterop } from "nativewind";
 
 interface Message {
   event_type: string;
@@ -12,10 +14,14 @@ interface Message {
   receiver_id?: string;
   id?: string; // Assuming messages have an ID for acknowledgment
   created_at?: string;
+  delivered?: boolean | undefined | null;
+  delivered_at?: string | null;
+  status: MessageStatus;
 }
 
 interface ChatMessageBubbleProps {
   message: Message;
+  recieverId: string;
 }
 
 const MessageContainerStyles = cva(
@@ -61,10 +67,19 @@ const MessageDtStyles = cva("mt-1 text-xs", {
   },
 });
 
-const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({ message }) => {
-  const isSender =
-    message.event_type === "send_message" ||
-    message.event_type === "message_acknowledgment";
+const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
+  message,
+  recieverId,
+}) => {
+  const isSender = message.sender_id != recieverId;
+
+  cssInterop(FontAwesome5, {
+    className: {
+      target: "style",
+      //@ts-ignore
+      nativeStyleToProp: { height: true, width: true, size: true },
+    },
+  });
 
   const dateTime = (
     <Text
@@ -94,6 +109,39 @@ const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({ message }) => {
     </Text>
   );
 
+  const statusContent = (status: MessageStatus) => {
+    // console.log({ status });
+    switch (status) {
+      case MessageStatus.STORED:
+      case MessageStatus.SENT:
+        return (
+          <FontAwesome5
+            name="check"
+            size={10}
+            className="text-muted opacity-40 self-end"
+          />
+        );
+      case MessageStatus.RECEIVED:
+        return (
+          <FontAwesome5
+            name="check-double"
+            size={10}
+            className="text-muted opacity-40 self-end"
+          />
+        );
+      case MessageStatus.READ:
+        return (
+          <FontAwesome5
+            name="check-double"
+            size={10}
+            className="text-sky-400 opacity-40 self-end"
+          />
+        );
+    }
+  };
+
+  // console.log(statusContent(message.status));
+
   return (
     <View
       className={cn(
@@ -104,6 +152,7 @@ const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({ message }) => {
     >
       {messageContent}
       {dateTime}
+      {isSender && statusContent(message.status)}
     </View>
   );
 };

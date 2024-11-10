@@ -1,5 +1,6 @@
-import { sqliteTable, text, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, index, integer } from "drizzle-orm/sqlite-core";
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
+import { boolean } from "drizzle-orm/mysql-core";
 
 // Enable foreign key support (SQLite specific).
 export const enableForeignKeys = "PRAGMA foreign_keys = ON;";
@@ -36,6 +37,11 @@ export const Messages = sqliteTable(
     content: text("content").notNull(),
     created_at: text("created_at").notNull(), // Store datetime as ISO 8601 string
     fileUrl: text("file_url"),
+    delivered: integer("delivered", { mode: "boolean" }).default(false),
+    delivered_at: text("delivered_at"),
+    status: text("status", {
+      enum: ["sent", "stored", "received", "read"],
+    }),
   },
   (table) => ({
     receiverIdIndex: index("idx_messages_receiver_id").on(table.receiver_id),
