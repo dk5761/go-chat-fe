@@ -1,8 +1,9 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import React from "react";
-import { FlatList } from "react-native-gesture-handler";
+import { FlatList } from "react-native";
 import { User } from "@/state/queries/users/users";
 import UserCard from "../cards/UserCard";
+import Text from "../Text";
 
 type Props = {
   users: User[];

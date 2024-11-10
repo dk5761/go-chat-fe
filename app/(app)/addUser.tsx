@@ -8,9 +8,7 @@ import { useGetUsers, User } from "@/state/queries/users/users";
 import db from "@/services/db";
 import { Users as IUsers, ChatList } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
-import { FlatList } from "react-native-gesture-handler";
-import UserCard from "@/components/cards/UserCard";
-import UserList from "@/components/addUser/UserList";
+import UserList from "@/components/list/UserList";
 import { toast } from "sonner-native";
 
 type Props = {};

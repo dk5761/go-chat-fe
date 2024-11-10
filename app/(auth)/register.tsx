@@ -41,7 +41,7 @@ const Register = (props: Props) => {
       {
         onSuccess: (data) => {
           // setAuthToken(data.token);
-          router.replace("/");
+          router.replace("/chat");
         },
         onError: (err, as) => {
           toast.error("Error", {
