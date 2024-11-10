@@ -22,6 +22,8 @@ import {
   Rubik_900Black,
 } from "@expo-google-fonts/rubik";
 import { Toaster } from "sonner-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "react-native";
 // Use imperatively
 colorScheme.set("system");
 
@@ -56,11 +58,11 @@ export default function RootLayout() {
 
   const { success, error } = useMigrations(db, migrations);
 
-  useEffect(() => {
-    if (loaded && success) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded, success]);
+  // useEffect(() => {
+  //   if (loaded && success) {
+  //     SplashScreen.hideAsync();
+  //   }
+  // }, [loaded, success]);
 
   if (!loaded) {
     return null;
@@ -71,8 +73,10 @@ export default function RootLayout() {
       <GestureHandlerRootView>
         <KeyboardProvider>
           <AuthProvider>
-            <Slot />
-            <Toaster />
+            <SafeAreaView className="flex-1">
+              <Slot />
+              <Toaster />
+            </SafeAreaView>
           </AuthProvider>
         </KeyboardProvider>
       </GestureHandlerRootView>

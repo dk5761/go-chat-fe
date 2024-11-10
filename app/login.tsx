@@ -55,9 +55,6 @@ const index = () => {
       className="flex-1  px-2 py-2 justify-center items-center
       bg-background"
     >
-      {/* <Text className="font-rubik-thin text-6xl">Index</Text> */}
-      {/* <Button title="test" onPress={() => {}} />
-      <Input value="asd" /> */}
       <Login
         onSubmitCB={(data) => onClickHandler(data)}
         btnText="Login"
