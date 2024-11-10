@@ -9,6 +9,7 @@ import { AuthAction, AuthContextType, AuthState, UserInfoType } from "./types";
 import { jwtDecode } from "jwt-decode";
 import useStorage from "@/services/storage/useStorage";
 import { storage } from "@/services/storage/mmkv";
+import { useRouter, useSegments } from "expo-router";
 
 const initialState: AuthState = {
   token: storage.getString("token") ?? null,
@@ -16,6 +17,27 @@ const initialState: AuthState = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+function useProtectedRoute(token: string | undefined | null) {
+  const segments = useSegments();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const inAuthGroup = segments[0] === "(auth)";
+
+    if (
+      // If the user is not signed in and the initial segment is not anything in the auth group.
+      !token &&
+      !inAuthGroup
+    ) {
+      // Redirect to the sign-in page.
+
+      router.replace("/login");
+    } else if (token && inAuthGroup) {
+      router.replace("/chat");
+    }
+  }, [token, segments]);
+}
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
@@ -88,6 +110,8 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       }
     }
   }, []);
+
+  useProtectedRoute(getLocalStorage());
 
   // Set token and store it in localStorage
   const setAuthToken = (token: string) => {

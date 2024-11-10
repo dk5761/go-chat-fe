@@ -58,9 +58,6 @@ export const WebSocketProvider: React.FC<{
 
       socketRef.current.onmessage = (event) => {
         const data: Message = JSON.parse(event.data);
-
-        console.log(data.event_type);
-
         if (data.event_type === "message_acknowledgment") {
           handleAcknowledgment(data);
         } else if (data.event_type === "receive_message") {
@@ -97,7 +94,10 @@ export const WebSocketProvider: React.FC<{
 
   const recieveMessage = async (messageData: Message) => {
     console.log("Recieving message:", messageData);
-    setMessages((prevMessages) => [...prevMessages, messageData]); // Track pending message
+    console.log({ rmpm: messages });
+    setMessages((prevMessages) => {
+      return [...prevMessages, messageData];
+    }); // Track pending message
     try {
       await db.insert(Messages).values({
         id: messageData.id as string,
@@ -116,13 +116,16 @@ export const WebSocketProvider: React.FC<{
 
   const handleAcknowledgment = async (ackData: Message) => {
     setPendingMessages((prev) => prev.filter((msg) => msg.id !== ackData.id));
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      {
-        ...ackData,
-        event_type: "send_message",
-      },
-    ]);
+    console.log({ hdpm: messages });
+    setMessages((prevMessages) => {
+      return [
+        ...prevMessages,
+        {
+          ...ackData,
+          event_type: "send_message",
+        },
+      ];
+    });
 
     // Log acknowledgment for debugging
     console.log("Message acknowledged:", ackData);

@@ -11,12 +11,15 @@ import { useGetProfile } from "@/state/queries/users/users";
 import { colorScheme } from "nativewind";
 import View from "@/components/View";
 import Text from "@/components/Text";
+import UserList from "@/components/list/ChatList";
 
 type Props = {};
 
 const Home = (props: Props) => {
   const { isConnected } = useWebSocket();
   const { data, isLoading, error } = useGetProfile({});
+
+  // console.log({ data });
 
   const { data: chatListData } = useLiveQuery(
     db
@@ -44,16 +47,16 @@ const Home = (props: Props) => {
   const scheme = colorScheme.get();
 
   return (
-    <View className=" flex-1">
+    <View className=" flex-1 px-4">
       <StatusBar backgroundColor={scheme == "dark" ? "#000" : "#fff"} />
-      <Tabs.Screen
+      <Stack.Screen
         options={{
           header: (props) => {
             return (
               <CustomChatHeader
                 title="Chat"
                 name={data?.username ?? ""}
-                status="online"
+                status={isConnected ? "Online" : "Offline"}
                 imageUrl="https://i.pinimg.com/736x/1f/54/0c/1f540cab2a3818950ca76c42211db9fe.jpg"
               />
             );
@@ -61,6 +64,10 @@ const Home = (props: Props) => {
           headerShadowVisible: false,
         }}
       />
+      <Text className="text-foreground text-3xl font-rubik-medium text-start my-2">
+        Chats
+      </Text>
+      <UserList data={chatListData} />
     </View>
   );
 };

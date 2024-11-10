@@ -3,6 +3,8 @@ import React from "react";
 import Entypo from "@expo/vector-icons/Entypo";
 import Text from "../Text";
 import { colorScheme } from "nativewind";
+import { cva } from "class-variance-authority";
+import { cn } from "@/utils/utils";
 
 type Props = {
   title: string;
@@ -10,6 +12,21 @@ type Props = {
   imageUrl: string;
   status: string;
 };
+
+const StatusTextStyles = cva(
+  "text-mutedForeground text-xl font-rubik-medium ",
+  {
+    variants: {
+      status: {
+        online: "text-primary",
+        offline: "",
+      },
+    },
+    defaultVariants: {
+      status: "offline",
+    },
+  }
+);
 
 const CustomChatHeader = ({ title, name, imageUrl, status }: Props) => {
   //   const router = useRouter();
@@ -25,7 +42,13 @@ const CustomChatHeader = ({ title, name, imageUrl, status }: Props) => {
               .map((v, i) => (i == 0 ? v.toUpperCase() : v))
               .join("")}
           </Text>
-          <Text className="text-xl font-rubik-medium text-foreground">
+          <Text
+            className={cn(
+              StatusTextStyles({
+                status: status.toLowerCase() as any,
+              })
+            )}
+          >
             {status}
           </Text>
         </View>

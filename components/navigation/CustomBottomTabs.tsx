@@ -1,6 +1,9 @@
 import { View, ViewStyle, TextStyle, Pressable } from "react-native";
 import React from "react";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import {
+  BottomTabBarProps,
+  BottomTabNavigationOptions,
+} from "@react-navigation/bottom-tabs";
 import Text from "../Text";
 import { cva } from "class-variance-authority";
 import { cn } from "@/utils/utils";
@@ -29,12 +32,28 @@ const CustomBottomTabs = ({
   state,
   descriptors,
   navigation,
+  style,
 }: CustomTabBarProps) => {
+  const currentKey = state["routes"][state["index"]]["key"];
+  const screenStyles =
+    currentKey && currentKey !== undefined
+      ? descriptors[currentKey]?.options.tabBarStyle
+      : ({} as any);
+
   return (
-    <View className="flex-row absolute bottom-4 left-0 right-0 w-full justify-center items-center">
+    <View
+      className="flex-row absolute bottom-4 left-0 right-0 w-full justify-center items-center"
+      style={[screenStyles]}
+    >
       <View className="flex-row px-4 py-2 justify-center items-center rounded-xl bg-card gap-4 shadow shadow-black ">
         {state.routes.map((route: any, index: number) => {
+          // manually hide the tabs from rendering.
+          // if (route.name == "chat") {
+          //   return null;
+          // }
+
           const { options } = descriptors[route.key];
+
           const label =
             options.tabBarLabel !== undefined
               ? options.tabBarLabel
