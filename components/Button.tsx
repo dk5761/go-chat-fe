@@ -27,22 +27,19 @@ type ButtonProps = TouchableOpacityProps & {
   loading?: boolean;
 };
 
-const ButtonStyles = cva(
-  "w-full px-2 rounded-md h-10 justify-center items-center",
-  {
-    variants: {
-      variant: {
-        primary: "bg-primary h-11 border border-input",
-        secondary: "bg-slate-100 border border-gray-200",
-        inverse: "bg-white border border-sky-300",
-        disabled: "bg-gray-300",
-      },
+const ButtonStyles = cva("px-2 rounded-md h-10 justify-center items-center", {
+  variants: {
+    variant: {
+      primary: "bg-primary  border border-input",
+      secondary: "bg-slate-100 border border-gray-200",
+      inverse: "bg-white border border-sky-300",
+      disabled: "bg-gray-300",
     },
-    defaultVariants: {
-      variant: "primary",
-    },
-  }
-);
+  },
+  defaultVariants: {
+    variant: "primary",
+  },
+});
 
 const TextStyles = cva("", {
   variants: {

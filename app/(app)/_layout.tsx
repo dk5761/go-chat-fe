@@ -6,7 +6,7 @@ import { wsBaseUrl } from "@/services/api/constants";
 import useStorage from "@/services/storage/useStorage";
 import { useGetProfile } from "@/state/queries/users/users";
 import { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
-import CustomHeader from "@/components/navigation/CustomHeader";
+import CustomHeader from "@/components/navigation/CustomTabHeader";
 import Feather from "@expo/vector-icons/Feather";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import CustomBottomTabs from "@/components/navigation/CustomBottomTabs";
@@ -48,7 +48,7 @@ export default function AppLayout() {
           // tabBarActiveTintColor: "blue",
 
           header: (props) => {
-            return <CustomHeader title="" showBackButton={true} />;
+            return <CustomHeader title={props.options.title ?? ""} />;
           },
         }}
         tabBar={(props) => <CustomBottomTabs {...props} />}
@@ -66,6 +66,7 @@ export default function AppLayout() {
           name="addUser"
           options={{
             title: "Search",
+
             tabBarIcon: ({ color }) => (
               <Feather name="search" size={24} color={color} />
             ),

@@ -1,4 +1,4 @@
-import { View, Text, StatusBar } from "react-native";
+import { StatusBar } from "react-native";
 import React from "react";
 import { useWebSocket } from "@/state/context/websocket/websocketContext";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -6,10 +6,11 @@ import db from "@/services/db";
 import { ChatList, Messages, Users } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
 import { Stack, Tabs } from "expo-router";
-import CustomHeader from "@/components/navigation/CustomHeader";
 import CustomChatHeader from "@/components/navigation/CustomChatHeader";
 import { useGetProfile } from "@/state/queries/users/users";
 import { colorScheme } from "nativewind";
+import View from "@/components/View";
+import Text from "@/components/Text";
 
 type Props = {};
 
@@ -43,7 +44,7 @@ const Home = (props: Props) => {
   const scheme = colorScheme.get();
 
   return (
-    <View className="bg-background flex-1">
+    <View className=" flex-1">
       <StatusBar backgroundColor={scheme == "dark" ? "#000" : "#fff"} />
       <Tabs.Screen
         options={{

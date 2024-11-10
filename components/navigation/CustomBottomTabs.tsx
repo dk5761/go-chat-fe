@@ -70,7 +70,7 @@ const CustomBottomTabs = ({
                   <Icon
                     focused={isFocused}
                     size={18}
-                    color={isFocused ? "#bbf7d0" : "#8CAB9D"}
+                    color={isFocused ? "#bbf7d0" : "gray"}
                   />
                 ) : (
                   ""
