@@ -56,7 +56,7 @@ const Home = (props: Props) => {
               <CustomChatHeader
                 title="Chat"
                 name={data?.username ?? ""}
-                status="online"
+                status={isConnected ? "Online" : "Offline"}
                 imageUrl="https://i.pinimg.com/736x/1f/54/0c/1f540cab2a3818950ca76c42211db9fe.jpg"
               />
             );

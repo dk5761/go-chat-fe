@@ -15,6 +15,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 
 type Props = {};
 
@@ -34,39 +35,18 @@ const UserChat = (props: Props) => {
 
   const { sendMessage, messages, setMessages } = useWebSocket();
 
-  // Fetch user and messages when the component mounts or `id` changes
-  useEffect(() => {
-    const fetchUserAndMessages = async () => {
-      try {
-        // Fetch the user based on the provided `id`
-        const fetchedUser = await db
-          .select()
-          .from(Users)
-          .where(eq(Users.id, id as string))
-          .limit(1);
-        setUser(fetchedUser[0]); // Set the user data if available
-
-        // Fetch messages with receiver_id as `id`, sorted by timestamp (latest first)
-        const fetchedMessages = await db
-          .select()
-          .from(Messages)
-          .where(
-            or(
-              eq(Messages.receiver_id, id as string),
-              eq(Messages.sender_id, id as string)
-            )
-          )
-          .orderBy(desc(Messages.created_at));
-        setChatMessages(fetchedMessages); // Set the messages in state
-      } catch (error) {
-        console.error("Error fetching user and messages:", error);
-      }
-    };
-
-    if (id) {
-      fetchUserAndMessages();
-    }
-  }, [id]);
+  const { data: chatData } = useLiveQuery(
+    db
+      .select()
+      .from(Messages)
+      .where(
+        or(
+          eq(Messages.receiver_id, id as string),
+          eq(Messages.sender_id, id as string)
+        )
+      )
+      .orderBy(desc(Messages.created_at))
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -128,7 +108,7 @@ const UserChat = (props: Props) => {
       keyboardVerticalOffset={120}
       behavior="padding"
     >
-      <View className="flex-1 px-2">
+      <View className="flex-1 px-2 ">
         <Stack.Screen
           options={{
             header: (props) => {
@@ -141,16 +121,17 @@ const UserChat = (props: Props) => {
             },
           }}
         />
-        <FlatList
-          data={allMessages}
-          keyExtractor={(item, index) => `${item.id || index}`}
-          renderItem={({ item }) => (
-            <ChatMessageBubble message={item} key={item.id} />
-          )}
-          inverted // To show the latest message at the bottom
-          contentContainerClassName="border  border-red-50 flex-1"
-        />
-        <View className=" flex-row gap-2 items-center mt-2">
+        <View className="flex-shrink border border-input rounded-lg p-2">
+          <FlatList
+            data={chatData}
+            keyExtractor={(item, index) => `${item.id || index}`}
+            renderItem={({ item }) => (
+              <ChatMessageBubble message={item} key={item.id} />
+            )}
+            inverted // To show the latest message at the bottom
+          />
+        </View>
+        <View className=" flex-row gap-2 items-center mt-2 bottom-1">
           <Input
             value={message}
             onChangeText={(text) => setMessage(text)}

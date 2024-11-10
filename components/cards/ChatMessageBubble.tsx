@@ -3,6 +3,7 @@ import React from "react";
 import { cva } from "class-variance-authority";
 import Text from "../Text";
 import { cn } from "@/utils/utils";
+import { colorScheme } from "nativewind";
 
 interface Message {
   event_type: string;
@@ -38,7 +39,7 @@ const MessageTextStyles = cva("", {
   variants: {
     message: {
       sender: "text-white ",
-      reciever: "text-white ",
+      reciever: "text-mutedForeground",
       default: "",
     },
   },
