@@ -121,7 +121,7 @@ const UserChat = (props: Props) => {
             },
           }}
         />
-        <View className="flex-shrink border border-input rounded-lg p-2">
+        <View className="flex-shrink flex-1 border border-input rounded-lg p-2">
           <FlatList
             data={chatData}
             keyExtractor={(item, index) => `${item.id || index}`}
