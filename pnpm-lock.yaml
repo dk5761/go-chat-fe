@@ -11,6 +11,9 @@ importers:
       '@expo-google-fonts/rubik':
         specifier: ^0.2.3
         version: 0.2.3
+      '@expo/config-plugins':
+        specifier: ^8.0.10
+        version: 8.0.10
       '@expo/vector-icons':
         specifier: ^14.0.2
         version: 14.0.4
