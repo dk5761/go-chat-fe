@@ -1,16 +1,14 @@
-import { StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 import React from "react";
-import Button from "@/components/Button";
-import Input from "@/components/Input";
 import Login from "@/forms/Login";
-import useAuthContext from "@/hooks/contextHooks/useAuthContext";
+import { toast } from "sonner-native";
 import { useMutation } from "@tanstack/react-query";
-import { login } from "@/state/queries/auth/auth";
+import { signUp } from "@/state/queries/auth/auth";
 import { router } from "expo-router";
 
-const index = () => {
-  const { setAuthToken } = useAuthContext();
+type Props = {};
 
+const Register = (props: Props) => {
   const mutation = useMutation({
     mutationFn: ({
       email,
@@ -21,7 +19,7 @@ const index = () => {
       username: string;
       password: string;
     }) => {
-      return login(email, username, password);
+      return signUp(email, username, password);
     },
   });
 
@@ -42,10 +40,19 @@ const index = () => {
       },
       {
         onSuccess: (data) => {
-          setAuthToken(data.token);
+          // setAuthToken(data.token);
           router.replace("/");
         },
-        onError: (err) => {},
+        onError: (err, as) => {
+          toast.error("Error", {
+            description: err.message,
+            styles: {
+              toast: {
+                backgroundColor: "#1e293b",
+              },
+            },
+          });
+        },
       }
     );
   };
@@ -60,12 +67,12 @@ const index = () => {
       <Input value="asd" /> */}
       <Login
         onSubmitCB={(data) => onClickHandler(data)}
-        btnText="Login"
-        title="Login"
-        redirectPath="/register"
+        btnText="Register"
+        title="Register"
+        redirectPath="/"
       />
     </View>
   );
 };
 
-export default index;
+export default Register;
