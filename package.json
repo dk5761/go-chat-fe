@@ -32,6 +32,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.36.1",
     "expo": "~51.0.28",
+    "expo-build-properties": "^0.12.5",
     "expo-constants": "~16.0.2",
     "expo-dev-client": "^4.0.29",
     "expo-drizzle-studio-plugin": "^0.0.2",
