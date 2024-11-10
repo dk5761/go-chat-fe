@@ -29,7 +29,7 @@ export default function AppLayout() {
 
   const segments = useSegments();
 
-  console.log(segments);
+  // console.log(segments);
   const nestedHomePageOpened = useMemo(() => {
     return (
       segments.length > 2 && segments[0] === "(app)" && segments[1] === "chat"
@@ -43,7 +43,7 @@ export default function AppLayout() {
     // in the headless Node process that the pages are rendered in.
 
     SplashScreen.hideAsync();
-    console.log("inside");
+    // console.log("inside");
     return <Redirect href={"/(auth)/login"} />;
   }
 
@@ -51,13 +51,13 @@ export default function AppLayout() {
 
   if (error) {
     purgeLocalStorage();
-    console.log("inside2");
+    // console.log("inside2");
 
     return <Redirect href={"/(auth)/login"} />;
   }
 
   if (isLoading) {
-    console.log("inside3");
+    // console.log("inside3");
 
     return (
       <View className="justify-center items-center flex-1">
@@ -70,9 +70,9 @@ export default function AppLayout() {
     purgeLocalStorage();
     return <Redirect href={"/(auth)/login"} />;
   }
-  console.log("inside4");
+  // console.log("inside4");
 
-  console.log({ data });
+  // console.log({ data });
   // This layout can be deferred because it's not the root layout.
   return (
     <WebSocketProvider serverUrl={`${wsBaseUrl}/api/chat/ws?userID=${data.id}`}>

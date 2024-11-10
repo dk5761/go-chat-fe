@@ -97,10 +97,10 @@ export const postApiRQ = async <T = any, P = any>(
     const response: AxiosResponse = await api.post<T>(url, data);
     return response.data.data;
   } catch (error: any) {
-    console.log({ error });
-    console.log({ error: error.response });
-    console.log({ error: error.response.data });
-    console.log({ error: error.response.data.error });
+    // console.log({ error });
+    // console.log({ error: error.response });
+    // console.log({ error: error.response.data });
+    // console.log({ error: error.response.data.error });
     throw new Error(error.response.data.error);
   }
 };
@@ -165,7 +165,7 @@ const patchApi = async <T = any, P = any>(
       data: response.data.data,
     };
   } catch (error: any) {
-    console.log({ error });
+    // console.log({ error });
     // Handle error as needed
     return error.response.data;
   }

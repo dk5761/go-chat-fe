@@ -68,14 +68,14 @@ export const WebSocketProvider: React.FC<{
       };
 
       socketRef.current.onmessage = (event) => {
-        console.log({
-          event,
-        });
+        // console.log({
+        //   event,
+        // });
         const data: Message = JSON.parse(event.data);
 
-        console.log({
-          data,
-        });
+        // console.log({
+        //   data,
+        // });
 
         if (data.event_type == "acknowledgment") {
           handleAcknowledgment(data);
@@ -112,9 +112,20 @@ export const WebSocketProvider: React.FC<{
   };
 
   const recieveMessage = async (messageData: Message) => {
-    setMessages((prevMessages) => {
-      return [...prevMessages, messageData];
-    }); // Track pending message
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      console.log("Sending Acknowledgement:", {
+        ...messageData,
+        event_type: "ack_received",
+      });
+      socketRef.current.send(
+        JSON.stringify({
+          ...messageData,
+          event_type: "ack_received",
+        })
+      );
+    } else {
+      console.log("Unable to send message, WebSocket is not connected.");
+    }
     try {
       await db.insert(Messages).values({
         id: messageData.id as string,
@@ -133,16 +144,6 @@ export const WebSocketProvider: React.FC<{
 
   const handleAcknowledgment = async (ackData: Message) => {
     setPendingMessages((prev) => prev.filter((msg) => msg.id !== ackData.id));
-
-    setMessages((prevMessages) => {
-      return [
-        ...prevMessages,
-        {
-          ...ackData,
-          event_type: "send_message",
-        },
-      ];
-    });
 
     // Save the acknowledged message to the Messages table
     try {

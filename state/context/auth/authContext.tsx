@@ -24,10 +24,10 @@ function useProtectedRoute(token: string | undefined | null) {
 
   React.useEffect(() => {
     const inAuthGroup = segments[0] === "(auth)";
-    console.log("inside a0", {
-      token,
-      inAuthGroup,
-    });
+    // console.log("inside a0", {
+    //   token,
+    //   inAuthGroup,
+    // });
 
     if (
       // If the user is not signed in and the initial segment is not anything in the auth group.
@@ -35,11 +35,11 @@ function useProtectedRoute(token: string | undefined | null) {
       !inAuthGroup
     ) {
       // Redirect to the sign-in page.
-      console.log("inside a1");
+      // console.log("inside a1");
 
       router.replace("/login");
     } else if (token && inAuthGroup) {
-      console.log("inside a2");
+      // console.log("inside a2");
 
       router.replace("/chat");
     }
