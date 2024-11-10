@@ -1,6 +1,7 @@
 import { getApiRQ } from "@/services/api/api";
 import { getProfileUrl, getUsersUrl } from "@/services/api/constants";
 import { queryParamType } from "@/types";
+
 import { generateCacheQueryKeyForOptions } from "@/utils/utils";
 import { useQuery } from "@tanstack/react-query";
 

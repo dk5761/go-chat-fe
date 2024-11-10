@@ -69,7 +69,7 @@ const Register = (props: Props) => {
         onSubmitCB={(data) => onClickHandler(data)}
         btnText="Register"
         title="Register"
-        redirectPath="/"
+        redirectPath="/login"
       />
     </View>
   );
