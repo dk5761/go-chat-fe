@@ -43,6 +43,7 @@ export default function AppLayout() {
     // in the headless Node process that the pages are rendered in.
 
     SplashScreen.hideAsync();
+    console.log("inside");
     return <Redirect href={"/(auth)/login"} />;
   }
 
@@ -50,10 +51,14 @@ export default function AppLayout() {
 
   if (error) {
     purgeLocalStorage();
+    console.log("inside2");
+
     return <Redirect href={"/(auth)/login"} />;
   }
 
   if (isLoading) {
+    console.log("inside3");
+
     return (
       <View className="justify-center items-center flex-1">
         <Text>Loading...</Text>
@@ -65,6 +70,7 @@ export default function AppLayout() {
     purgeLocalStorage();
     return <Redirect href={"/(auth)/login"} />;
   }
+  console.log("inside4");
 
   console.log({ data });
   // This layout can be deferred because it's not the root layout.
