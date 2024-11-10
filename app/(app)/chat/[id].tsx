@@ -6,7 +6,10 @@ import Text from "@/components/Text";
 import View from "@/components/View";
 import db from "@/services/db";
 import { ChatList, Messages, Users } from "@/services/db/schema";
-import { useWebSocket } from "@/state/context/websocket/websocketContext";
+import {
+  MessageStatus,
+  useWebSocket,
+} from "@/state/context/websocket/websocketContext";
 import { Feather } from "@expo/vector-icons";
 import { desc, eq, or } from "drizzle-orm";
 import { Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
@@ -94,6 +97,7 @@ const UserChat = (props: Props) => {
       event_type: "send_message",
       receiver_id: id as string, // Use the current `id` from the route params
       content: message,
+      status: MessageStatus.SENT,
     };
     sendMessage(messageData);
     setMessage("");
@@ -125,9 +129,15 @@ const UserChat = (props: Props) => {
           <FlatList
             data={chatData}
             keyExtractor={(item, index) => `${item.id || index}`}
-            renderItem={({ item }) => (
-              <ChatMessageBubble message={item} key={item.id} />
-            )}
+            renderItem={({ item }) => {
+              return (
+                <ChatMessageBubble
+                  recieverId={id as string}
+                  message={item as any}
+                  key={item.id}
+                />
+              );
+            }}
             inverted // To show the latest message at the bottom
           />
         </View>

@@ -1,5 +1,6 @@
 import db from "@/services/db";
 import { Messages } from "@/services/db/schema";
+import { eq } from "drizzle-orm";
 import React, {
   createContext,
   useContext,
@@ -9,6 +10,13 @@ import React, {
   useRef,
 } from "react";
 
+export enum MessageStatus {
+  STORED = "stored",
+  SENT = "sent",
+  RECEIVED = "received",
+  READ = "read",
+}
+
 interface Message {
   event_type: string;
   sender_id?: string;
@@ -16,6 +24,9 @@ interface Message {
   receiver_id?: string;
   id?: string; // Assuming messages have an ID for acknowledgment
   created_at?: string;
+  delivered?: string;
+  delivered_at?: string;
+  status: MessageStatus;
 }
 
 interface WebSocketContextProps {
@@ -57,8 +68,16 @@ export const WebSocketProvider: React.FC<{
       };
 
       socketRef.current.onmessage = (event) => {
+        console.log({
+          event,
+        });
         const data: Message = JSON.parse(event.data);
-        if (data.event_type === "message_acknowledgment") {
+
+        console.log({
+          data,
+        });
+
+        if (data.event_type == "acknowledgment") {
           handleAcknowledgment(data);
         } else if (data.event_type === "receive_message") {
           recieveMessage(data);
@@ -93,8 +112,6 @@ export const WebSocketProvider: React.FC<{
   };
 
   const recieveMessage = async (messageData: Message) => {
-    console.log("Recieving message:", messageData);
-    console.log({ rmpm: messages });
     setMessages((prevMessages) => {
       return [...prevMessages, messageData];
     }); // Track pending message
@@ -108,7 +125,7 @@ export const WebSocketProvider: React.FC<{
         created_at: messageData.created_at ?? "",
       });
 
-      console.log("Acknowledged message saved to Messages table:", messageData);
+      // console.log("Acknowledged message saved to Messages table:", messageData);
     } catch (error) {
       console.error("Error saving message to Messages table:", error);
     }
@@ -116,7 +133,7 @@ export const WebSocketProvider: React.FC<{
 
   const handleAcknowledgment = async (ackData: Message) => {
     setPendingMessages((prev) => prev.filter((msg) => msg.id !== ackData.id));
-    console.log({ hdpm: messages });
+
     setMessages((prevMessages) => {
       return [
         ...prevMessages,
@@ -127,21 +144,39 @@ export const WebSocketProvider: React.FC<{
       ];
     });
 
-    // Log acknowledgment for debugging
-    console.log("Message acknowledged:", ackData);
-
     // Save the acknowledged message to the Messages table
     try {
-      await db.insert(Messages).values({
-        id: ackData.id as string,
-        event_type: "send_message",
-        sender_id: ackData.sender_id ?? "",
-        receiver_id: ackData.receiver_id ?? "",
-        content: ackData.content ?? "",
-        created_at: ackData.created_at ?? "",
-      });
+      const data = await db
+        .select()
+        .from(Messages)
+        .where(eq(Messages.id, ackData.id ?? ""));
 
-      console.log("Acknowledged message saved to Messages table:", ackData);
+      if (data.length > 0) {
+        await db
+          .update(Messages)
+          .set({
+            status: ackData.status,
+            delivered: ackData.delivered ? true : false,
+            delivered_at: ackData.delivered_at,
+          })
+          .where(eq(Messages.id, ackData.id ?? ""));
+      } else {
+        await db.insert(Messages).values({
+          id: ackData.id as string,
+          event_type: "send_message",
+          sender_id: ackData.sender_id ?? "",
+          receiver_id: ackData.receiver_id ?? "",
+          content: ackData.content ?? "",
+          created_at: ackData.created_at ?? "",
+          status: ackData.status,
+          delivered: ackData.delivered ? true : false,
+          delivered_at: ackData.delivered_at,
+        });
+      }
+
+      // console.log("Acknowledged message saved to Messages table:", ackData, {
+      //   data2,
+      // });
     } catch (error) {
       console.error("Error saving message to Messages table:", error);
     }
