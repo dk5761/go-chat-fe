@@ -12,6 +12,7 @@ export const apiUrls = {
   login: "/auth/login",
   register: "/auth/signup",
   users: "/api/users",
+  token: "/api/token",
   details: "/api/details",
 };
 

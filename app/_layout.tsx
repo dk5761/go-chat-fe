@@ -23,8 +23,7 @@ import {
 } from "@expo-google-fonts/rubik";
 import { Toaster } from "sonner-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "react-native";
-// Use imperatively
+
 colorScheme.set("system");
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.

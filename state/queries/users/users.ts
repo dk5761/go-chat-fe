@@ -1,5 +1,5 @@
-import { getApiRQ } from "@/services/api/api";
-import { getProfileUrl, getUsersUrl } from "@/services/api/constants";
+import { getApiRQ, patchApiRQ, postApiRQ } from "@/services/api/api";
+import { apiUrls, getProfileUrl, getUsersUrl } from "@/services/api/constants";
 import { queryParamType } from "@/types";
 
 import { generateCacheQueryKeyForOptions } from "@/utils/utils";
@@ -77,3 +77,12 @@ export function useGetProfile({
     ...queryParams,
   });
 }
+
+export const updateToken = async (device_token: string) => {
+  const url = apiUrls.token;
+  const response = await patchApiRQ(url, {
+    device_token: device_token,
+  });
+
+  return response;
+};
