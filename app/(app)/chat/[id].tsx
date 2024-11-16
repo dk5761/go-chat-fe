@@ -19,6 +19,8 @@ import { FlatList } from "react-native-gesture-handler";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useGetProfile } from "@/state/queries/users/users";
+import uuid from "react-native-uuid";
 
 type Props = {};
 
@@ -33,8 +35,8 @@ cssInterop(Ionicons, {
 const UserChat = (props: Props) => {
   const { id, name } = useLocalSearchParams();
   const [message, setMessage] = useState<string>("");
-  const [user, setUser] = useState<any | null>(null);
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
+
+  const { data } = useGetProfile({});
 
   const { sendMessage, messages, setMessages } = useWebSocket();
 
@@ -98,13 +100,12 @@ const UserChat = (props: Props) => {
       receiver_id: id as string, // Use the current `id` from the route params
       content: message,
       status: MessageStatus.SENT,
+      sender_id: data!.id,
+      temp_id: uuid.v4(),
     };
     sendMessage(messageData);
     setMessage("");
   };
-
-  // Combine real-time messages and fetched messages for FlatList
-  const allMessages = [...messages, ...chatMessages];
 
   return (
     <KeyboardAvoidingView

@@ -1,6 +1,10 @@
 import db from "@/services/db";
 import { Messages } from "@/services/db/schema";
 import { eq } from "drizzle-orm";
+import uuid from "react-native-uuid";
+
+import NetInfo from "@react-native-community/netinfo";
+
 import React, {
   createContext,
   useContext,
@@ -11,6 +15,7 @@ import React, {
 } from "react";
 
 export enum MessageStatus {
+  PENDING = "pending",
   STORED = "stored",
   SENT = "sent",
   RECEIVED = "received",
@@ -19,14 +24,16 @@ export enum MessageStatus {
 
 interface Message {
   event_type: string;
-  sender_id?: string;
+  sender_id: string;
   content: string;
-  receiver_id?: string;
-  id?: string; // Assuming messages have an ID for acknowledgment
-  created_at?: string;
-  delivered?: string;
-  delivered_at?: string;
-  status: MessageStatus;
+  receiver_id: string;
+  temp_id: string;
+  id?: string;
+  message_id?: string; // Assuming messages have an ID for acknowledgment
+  created_at?: Date | string;
+  delivered?: boolean | null;
+  delivered_at?: string | null;
+  status: MessageStatus | null;
 }
 
 interface WebSocketContextProps {
@@ -46,10 +53,33 @@ export const WebSocketProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ serverUrl, reconnectInterval = 5000, children }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [pendingMessages, setPendingMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Subscribe to network state changes
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      console.log("Connection type", state.type);
+      console.log("Is connected?", state.isConnected);
+
+      if (state.isConnected && state.isInternetReachable) {
+        (async () => {
+          const data = await db
+            .select()
+            .from(Messages)
+            .where(eq(Messages.status, "pending"));
+
+          data.forEach((item) => sendMessage(item as Message));
+        })();
+      }
+    });
+
+    // Cleanup subscription on component unmount
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const connect = useCallback(() => {
     if (
@@ -68,14 +98,7 @@ export const WebSocketProvider: React.FC<{
       };
 
       socketRef.current.onmessage = (event) => {
-        // console.log({
-        //   event,
-        // });
         const data: Message = JSON.parse(event.data);
-
-        // console.log({
-        //   data,
-        // });
 
         if (data.event_type == "acknowledgment") {
           handleAcknowledgment(data);
@@ -101,13 +124,34 @@ export const WebSocketProvider: React.FC<{
     }
   }, [connect, reconnectInterval]);
 
-  const sendMessage = (messageData: Message) => {
+  const sendMessage = async (messageData: Message) => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       console.log("Sending message:", messageData);
       socketRef.current.send(JSON.stringify(messageData));
-      setPendingMessages((prev) => [...prev, messageData]); // Track pending message
+      // setPendingMessages((prev) => [...prev, messageData]); // Track pending message
     } else {
+      async () => {
+        await handleUnSentMessage(messageData);
+      };
       console.log("Unable to send message, WebSocket is not connected.");
+    }
+  };
+
+  const handleUnSentMessage = async (data: Message) => {
+    try {
+      await db.insert(Messages).values({
+        id: uuid.v4(),
+        temp_id: data.temp_id,
+        event_type: "send_message",
+        sender_id: data.sender_id!,
+        receiver_id: data.receiver_id,
+        content: data.content,
+        status: "pending",
+
+        created_at: new Date(),
+      });
+    } catch (error) {
+      console.error("Error saving message to Messages table:", error);
     }
   };
 
@@ -129,33 +173,31 @@ export const WebSocketProvider: React.FC<{
     try {
       await db.insert(Messages).values({
         id: messageData.id as string,
+        temp_id: messageData.temp_id as string,
         event_type: messageData.event_type,
         sender_id: messageData.sender_id ?? "",
         receiver_id: messageData.receiver_id ?? "",
         content: messageData.content ?? "",
-        created_at: messageData.created_at ?? "",
+        created_at: new Date(messageData.created_at!),
       });
-
-      // console.log("Acknowledged message saved to Messages table:", messageData);
     } catch (error) {
       console.error("Error saving message to Messages table:", error);
     }
   };
 
   const handleAcknowledgment = async (ackData: Message) => {
-    setPendingMessages((prev) => prev.filter((msg) => msg.id !== ackData.id));
-
     // Save the acknowledged message to the Messages table
     try {
       const data = await db
         .select()
         .from(Messages)
-        .where(eq(Messages.id, ackData.id ?? ""));
+        .where(eq(Messages.temp_id, ackData.temp_id));
 
       if (data.length > 0) {
         await db
           .update(Messages)
           .set({
+            id: ackData.id,
             status: ackData.status,
             delivered: ackData.delivered ? true : false,
             delivered_at: ackData.delivered_at,
@@ -164,11 +206,12 @@ export const WebSocketProvider: React.FC<{
       } else {
         await db.insert(Messages).values({
           id: ackData.id as string,
+          temp_id: ackData.temp_id,
           event_type: "send_message",
           sender_id: ackData.sender_id ?? "",
           receiver_id: ackData.receiver_id ?? "",
           content: ackData.content ?? "",
-          created_at: ackData.created_at ?? "",
+          created_at: new Date(ackData.created_at!),
           status: ackData.status,
           delivered: ackData.delivered ? true : false,
           delivered_at: ackData.delivered_at,

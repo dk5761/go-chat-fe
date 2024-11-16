@@ -29,3 +29,4 @@ expo-env.d.ts
 *.apk
 
 configs/
+drizzle/*

@@ -37,9 +37,9 @@ const Login: React.FC<ILoginForm> = ({
   } = useForm<LoginSchema>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "1@dk.com",
-      password: "dk@123",
-      username: "one",
+      email: "asd@asd.com",
+      password: "asd@asd",
+      username: "asd",
     },
   });
 
