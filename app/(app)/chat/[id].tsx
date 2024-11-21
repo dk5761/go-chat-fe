@@ -142,12 +142,13 @@ const UserChat = (props: Props) => {
             inverted // To show the latest message at the bottom
           />
         </View>
-        <View className=" flex-row gap-2 items-center mt-2 bottom-1">
+        <View className=" flex-row gap-2 items-center mt-2 bottom-1 items-end">
           <Input
             value={message}
             onChangeText={(text) => setMessage(text)}
-            placeholder="Type Username to Search..."
-            className="flex-1 h-14"
+            placeholder="Type to Send..."
+            className="flex-1 "
+            dynamicHeight={true}
           />
           <Button
             title={

@@ -51,7 +51,7 @@ export const WebSocketProvider: React.FC<{
   serverUrl: string;
   reconnectInterval?: number;
   children: React.ReactNode;
-}> = ({ serverUrl, reconnectInterval = 5000, children }) => {
+}> = ({ serverUrl, reconnectInterval = 3000, children }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
@@ -60,9 +60,6 @@ export const WebSocketProvider: React.FC<{
   useEffect(() => {
     // Subscribe to network state changes
     const unsubscribe = NetInfo.addEventListener((state) => {
-      console.log("Connection type", state.type);
-      console.log("Is connected?", state.isConnected);
-
       if (state.isConnected && state.isInternetReachable) {
         (async () => {
           const data = await db
