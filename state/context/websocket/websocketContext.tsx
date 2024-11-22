@@ -57,26 +57,20 @@ export const WebSocketProvider: React.FC<{
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    // Subscribe to network state changes
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      if (state.isConnected && state.isInternetReachable) {
-        (async () => {
-          const data = await db
-            .select()
-            .from(Messages)
-            .where(eq(Messages.status, "pending"));
+  const sendPendingMessages = async () => {
+    try {
+      const pendingMessages = await db
+        .select()
+        .from(Messages)
+        .where(eq(Messages.status, "pending"));
 
-          data.forEach((item) => sendMessage(item as Message));
-        })();
-      }
-    });
-
-    // Cleanup subscription on component unmount
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+      pendingMessages.forEach((message) => {
+        sendMessage(message as Message);
+      });
+    } catch (error) {
+      console.error("Error fetching pending messages:", error);
+    }
+  };
 
   const connect = useCallback(() => {
     if (
@@ -92,10 +86,14 @@ export const WebSocketProvider: React.FC<{
           clearTimeout(reconnectTimeoutRef.current);
           reconnectTimeoutRef.current = null;
         }
+        // Send pending messages when connection is established
+        sendPendingMessages();
       };
 
       socketRef.current.onmessage = (event) => {
         const data: Message = JSON.parse(event.data);
+
+        console.log("Acknowledgment received:", data);
 
         if (data.event_type == "acknowledgment") {
           handleAcknowledgment(data);
@@ -123,30 +121,41 @@ export const WebSocketProvider: React.FC<{
 
   const sendMessage = async (messageData: Message) => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      if (messageData.id) delete messageData.id;
+
       console.log("Sending message:", messageData);
       socketRef.current.send(JSON.stringify(messageData));
       // setPendingMessages((prev) => [...prev, messageData]); // Track pending message
     } else {
-      async () => {
-        await handleUnSentMessage(messageData);
-      };
+      await handleUnSentMessage(messageData);
+
       console.log("Unable to send message, WebSocket is not connected.");
+      connect();
     }
   };
 
   const handleUnSentMessage = async (data: Message) => {
     try {
-      await db.insert(Messages).values({
-        id: uuid.v4(),
-        temp_id: data.temp_id,
-        event_type: "send_message",
-        sender_id: data.sender_id!,
-        receiver_id: data.receiver_id,
-        content: data.content,
-        status: "pending",
+      // Check if the message is already present in the Messages table
+      const isPresent = await db
+        .select()
+        .from(Messages)
+        .where(eq(Messages.temp_id, data.temp_id));
 
-        created_at: new Date(),
-      });
+      // If the message is not present in the Messages table, insert it
+      if (isPresent.length == 0) {
+        await db.insert(Messages).values({
+          id: uuid.v4(),
+          temp_id: data.temp_id,
+          event_type: "send_message",
+          sender_id: data.sender_id!,
+          receiver_id: data.receiver_id,
+          content: data.content,
+          status: "pending",
+
+          created_at: new Date(),
+        });
+      }
     } catch (error) {
       console.error("Error saving message to Messages table:", error);
     }
@@ -199,7 +208,7 @@ export const WebSocketProvider: React.FC<{
             delivered: ackData.delivered ? true : false,
             delivered_at: ackData.delivered_at,
           })
-          .where(eq(Messages.id, ackData.id ?? ""));
+          .where(eq(Messages.temp_id, ackData.temp_id));
       } else {
         await db.insert(Messages).values({
           id: ackData.id as string,
@@ -215,9 +224,7 @@ export const WebSocketProvider: React.FC<{
         });
       }
 
-      // console.log("Acknowledged message saved to Messages table:", ackData, {
-      //   data2,
-      // });
+      // console.log("Acknowledged message saved to Messages table:", ackData, {});
     } catch (error) {
       console.error("Error saving message to Messages table:", error);
     }
