@@ -1,6 +1,5 @@
 import { sqliteTable, text, index, integer } from "drizzle-orm/sqlite-core";
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import { boolean } from "drizzle-orm/mysql-core";
 
 // Enable foreign key support (SQLite specific).
 export const enableForeignKeys = "PRAGMA foreign_keys = ON;";
@@ -27,6 +26,7 @@ export const Messages = sqliteTable(
   "Messages",
   {
     id: text("id").primaryKey(), // ObjectID primary key
+    temp_id: text("message_id").notNull(),
     event_type: text("event_type").notNull(),
     sender_id: text("sender_id")
       .notNull()
@@ -35,12 +35,12 @@ export const Messages = sqliteTable(
       .notNull()
       .references(() => Users.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
-    created_at: text("created_at").notNull(), // Store datetime as ISO 8601 string
+    created_at: integer("created_at", { mode: "timestamp" }).notNull(), // Store datetime as ISO 8601 string
     fileUrl: text("file_url"),
     delivered: integer("delivered", { mode: "boolean" }).default(false),
     delivered_at: text("delivered_at"),
     status: text("status", {
-      enum: ["sent", "stored", "received", "read"],
+      enum: ["sent", "stored", "received", "read", "pending"],
     }),
   },
   (table) => ({
@@ -56,7 +56,7 @@ export const ChatList = sqliteTable("ChatList", {
   lastMessage: text("last_message").references(() => Messages.id, {
     onDelete: "set null",
   }),
-  lastMessageDatetime: text("last_message_datetime"), // Store datetime as ISO 8601 string
+  lastMessageDatetime: integer("last_message_datetime", { mode: "timestamp" }), // Store datetime as ISO 8601 string
 });
 
 // Infer the TypeScript types for selecting and inserting

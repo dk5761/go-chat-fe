@@ -23,7 +23,7 @@ import {
 } from "@expo-google-fonts/rubik";
 import { Toaster } from "sonner-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "react-native";
+import "react-native-get-random-values";
 // Use imperatively
 colorScheme.set("system");
 
