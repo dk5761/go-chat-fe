@@ -112,6 +112,15 @@ const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
   const statusContent = (status: MessageStatus) => {
     // console.log({ status });
     switch (status) {
+      case MessageStatus.PENDING:
+        return (
+          <FontAwesome5
+            name="clock"
+            size={10}
+            className="text-muted opacity-40 self-end"
+          />
+        );
+
       case MessageStatus.STORED:
       case MessageStatus.SENT:
         return (
